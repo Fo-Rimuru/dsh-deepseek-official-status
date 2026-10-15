@@ -1,0 +1,87 @@
+# 推 tag（v*）时自动发布到 npm，并建好 GitHub Release。
+#
+# 发布方式：npm Trusted Publishing（OIDC）—— 不需要任何长期 token，
+# 前提是在 npm 包设置页配好 Trusted Publisher（owner/repo + 本文件名 publish.yml）。
+#
+# 手动触发（Actions 页面 → Run workflow）时可以勾 dry_run：只走完打包与校验、
+# 不真正上传 —— 用来在信任整条链路之前先演练一遍。
+
+name: publish
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: '只演练（不真正发布到 npm）'
+        type: boolean
+        default: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # 建 Release
+      id-token: write   # npm provenance（来源证明）+ Trusted Publishing 换短期凭据
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          # ⚠️ **故意不设 registry-url**：设了它，setup-node 会生成一个 `.npmrc`，内容形如
+          #   //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
+          # 而走 Trusted Publishing（OIDC）时这个变量根本不存在 —— npm 会拿空 token 去认证然后失败。
+
+      # 版本一致性：tag 必须与 package.json 完全一致。
+      # npm 上的版本不能删除、只能废弃，发错代价很大，所以宁可在这里就失败。
+      - name: 校验 tag 与 package.json 版本一致
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG="$(node -p "require('./package.json').version")"
+          echo "tag=$TAG  package.json=$PKG"
+          if [ "$TAG" != "$PKG" ]; then
+            echo "::error::tag（$TAG）与 package.json（$PKG）不一致，拒绝发布"
+            exit 1
+          fi
+
+      # 这个插件没有运行时依赖，所以不需要 npm ci。
+      - name: 解析层单元测试（离线，读 test/fixtures）
+        run: node --test test/parser.test.mjs test/rss.test.mjs
+
+      - name: RSS 兜底路径冒烟（离线，桩 fetch）
+        run: node test/rss-fallback.smoke.mjs
+
+      # 注意：test/host.smoke.mjs 会真连 status.deepseek.com，故意不进 CI
+      # （上游抖动不该让发布变红），它由作者在本机跑。
+
+      # 双保险：万一别的步骤又留下了 .npmrc，这里清掉，确保 npm 走 OIDC 而不是找 token
+      - name: 清掉可能存在的 .npmrc（OIDC 不需要 token 文件）
+        run: rm -f .npmrc "$HOME/.npmrc"
+
+      # ⚠️ **Trusted Publishing 需要 npm >= 11.5.1**，而 setup-node 装的 Node 22 自带 npm 10.x。
+      # 旧版 npm 不认识 OIDC 换来的凭据，会把自己当成「没登录」，报：
+      #   npm error code ENEEDAUTH
+      #   npm error need auth This command requires you to be logged in to https://registry.npmjs.org/
+      - name: 升级 npm（Trusted Publishing 需要 >= 11.5.1）
+        run: |
+          npm install -g npm@latest
+          echo "npm 版本: $(npm --version)"
+
+      - name: 发布到 npm
+        # 故意不传 NODE_AUTH_TOKEN：GitHub 用工作流的身份令牌向 npm 换取**短期**凭据。
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "== 演练模式：只打包，不上传 =="
+            npm publish --dry-run --access public
+          else
+            npm publish --provenance --access public
+          fi
+
+      - name: 建 GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v') && inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes

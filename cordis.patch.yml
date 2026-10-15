@@ -1,0 +1,7 @@
+# dsh-deepseek-official-status bundle patch: mounts the plugin into a profile layer stack.
+# The row id is the key users override in their profile's cordis.patch.yml; the row name
+# is the module this package exports, so it must stay the package name.
+# Keep the two different so the plugin card does not print the same string twice.
+- insert:
+    - id: deepseek-official-status
+      name: 'dsh-deepseek-official-status'
