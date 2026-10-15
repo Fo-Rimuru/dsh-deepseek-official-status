@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "dsh-deepseek-official-status[官方服务状态]",
+    "description": "在会话头部用一颗信号灯实时显示 DeepSeek 官方服务状态（status.deepseek.com）：颜色表示总体状态，悬停展开各组件状态与可用率、进行中与最近事件；读不到数据时明确降级并保留上次快照，绝不假装正常。"
+  }
+}

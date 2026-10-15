@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "dsh-deepseek-official-status[Official Service Status]",
+    "description": "Live DeepSeek official service status (status.deepseek.com) as a traffic-light dot in the conversation header: colour for the overall state, hover for per-component status and uptime, plus active and recent incidents. When the source is unreadable it degrades explicitly and keeps the last snapshot instead of pretending everything is fine."
+  }
+}
