@@ -49,7 +49,7 @@ profile `package.json` 的 `dsh.profile.bundles` 数组里，`dsh plugin add` �
 
 后五个只影响面板观感，改坏了随时可以逐个「恢复默认」。把 `glassBlur` 调成 0 就能直观
 看到它的作用 —— 面板会退化成一块几乎透明的玻璃片，背后正文清晰穿透：
-[`docs/screenshots/param-blur-off.png`](docs/screenshots/param-blur-off.png)。
+[`docs/screenshots/param-blur-off.png`](https://github.com/Fo-Rimuru/dsh-deepseek-official-status/blob/main/docs/screenshots/param-blur-off.png)。
 
 > **为什么不在「设置」里**：DSH 的设计是「**自带配置的插件把配置渲染在插件页而不是设置里**」
 > —— 插件必须自己注册 `plugins.bundle.config`（以包名为键）这个 slot 并提供表单 UI，
