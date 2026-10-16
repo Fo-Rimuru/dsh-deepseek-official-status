@@ -5,7 +5,7 @@
  * 抓的是真实网络，所以耗时几秒；失败也照样输出，方便看出是哪一段断了。
  * 运行：见 test/README.md
  */
-import { apply, ROUTE_PATH } from "../lib/index.js";
+import { apply, GLASS_PROBE_PATH, ROUTE_PATH } from "../lib/index.js";
 
 const routes = [];
 const logs = [];
@@ -43,10 +43,11 @@ apply(fakeCtx, { sourceUrl: "https://status.deepseek.com/", pollIntervalMs: 6000
 console.log("宿主日志：");
 for (const line of logs) console.log(`  ${line}`);
 
-check("只注册了一条路由", routes.length === 1, String(routes.length));
+check("注册了两条路由（数据 + 背景采样诊断）", routes.length === 2, String(routes.length));
 const route = routes.find((r) => r.path === ROUTE_PATH);
 check(`路由路径是 ${ROUTE_PATH}`, route !== undefined);
 check("路由 kind 是 exact", route?.kind === "exact", String(route?.kind));
+check(`诊断路由 ${GLASS_PROBE_PATH} 已注册`, routes.some((r) => r.path === GLASS_PROBE_PATH));
 
 /** 模拟一次 HTTP 请求，捕获 handler 写出的状态码与 body。 */
 async function invoke(handler) {
