@@ -138,7 +138,7 @@ status.deepseek.com 是 Flashcat/FlashDuty 托管的 Next.js 状态页，**没�
 
 RSS 兜底时的真实样子（用「只有 `/feed.rss` 通」的本地桩实测：RSC 与 HTML 都返回 500）：
 
-![RSS 兜底时的降级面板](https://raw.githubusercontent.com/Fo-Rimuru/dsh-deepseek-official-status/main/docs/screenshots/degraded.png)
+![RSS 兜底时的降级面板](https://raw.githubusercontent.com/Fo-Rimuru/dsh-deepseek-official-status/main/docs/screenshots/degraded-hd.png)
 
 状态语义（实测）：`page.components[]` **不带** `status` 字段，组件状态完全由
 `active_changes[]`（服务端的全量进行中事件列表）推导 —— `"active_changes":[]`
