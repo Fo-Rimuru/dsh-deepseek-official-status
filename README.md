@@ -1,5 +1,9 @@
 # dsh-deepseek-official-status
 
+[![npm version](https://img.shields.io/npm/v/dsh-deepseek-official-status?color=4d6bfe)](https://www.npmjs.com/package/dsh-deepseek-official-status)
+[![license](https://img.shields.io/npm/l/dsh-deepseek-official-status)](LICENSE)
+[![DSH](https://img.shields.io/badge/DSH-%3E%3D0.2.0--rc.1%20%3C0.3.0-4d6bfe)](package.json)
+
 DeepSeek Harness 插件：在会话头部显示 **DeepSeek 官方服务状态**（数据来自
 [status.deepseek.com](https://status.deepseek.com/)）。
 
@@ -19,16 +23,34 @@ DeepSeek Harness 插件：在会话头部显示 **DeepSeek 官方服务状态**�
 
 ## 安装
 
+**前置要求**：DSH Desktop / CLI 内核 **`>=0.2.0-rc.1 <0.3.0-0`**（见 `package.json` 的
+`engines.dsh`）。旧内核（0.1.x）不适用。
+
 ```powershell
-# 从 npm（发布后）
+# 从 npm 安装（推荐）
 dsh plugin --profile desktop add dsh-deepseek-official-status
 
-# 本地开发目录
+# 或从本地目录安装（开发时）
 dsh plugin --profile desktop add 'D:\path\to\dsh-deepseek-official-status'
 ```
 
-装完**必须重启 DSH**（宿主侧和客户端侧都要重新加载）。插件生效的条件是它出现在
-profile `package.json` 的 `dsh.profile.bundles` 数组里，`dsh plugin add` 会自动追加。
+装完**必须重启 DSH** —— 宿主侧和客户端侧都要重新加载。
+
+插件生效的条件是它出现在 profile `package.json` 的 `dsh.profile.bundles` 数组里；
+`dsh plugin add` 会自动追加这一项，不需要手工编辑。
+
+**卸载**：`dsh plugin --profile desktop remove dsh-deepseek-official-status`，然后重启。
+
+## 快速开始
+
+1. 重启后**随便打开一个会话**（空会话不渲染会话头部，看不到信号灯）；
+2. 看会话标题右侧 —— 出现一颗**彩色圆点**即安装成功；
+3. **鼠标移上去**展开面板，移开自动收起；
+4. 想调观感或轮询间隔：**侧栏「插件」→ `dsh-deepseek-official-status[官方服务状态]`** 的卡片里改。
+
+> 信号灯颜色是**实时**的：宿主进程按 `pollIntervalMs`（默认 60 秒）抓一次状态页，
+> 浏览器侧每 20 秒读一次本地路由。打开面板时会**立即刷新一次**，所以改完配置
+> 「关掉面板再打开」就能看到新样子。
 
 ## 配置
 
@@ -41,13 +63,15 @@ profile `package.json` 的 `dsh.profile.bundles` 数组里，`dsh plugin add` �
 | `sourceUrl` | string | `https://status.deepseek.com/` | — | 状态页地址 |
 | `pollIntervalMs` | number | `60000` | 15000–3600000 | 宿主轮询间隔（毫秒） |
 | `timeoutMs` | number | `15000` | 5000–120000 | 单次抓取超时（毫秒） |
-| `glassAlpha` | number | `58` | 5–100 | 面板玻璃底色不透明度（%），越小越透 |
-| `glassBlur` | number | `24` | 0–48 | 面板背后内容的模糊半径（px），玻璃感的关键 |
-| `glassSaturate` | number | `190` | 100–260 | 透过面板看到的颜色饱和度（%） |
-| `glassHighlight` | number | `30` | 0–100 | 玻璃边缘亮线与顶部高光强度（%） |
-| `glassRadius` | number | `18` | 4–28 | 面板圆角（px） |
+| `glassLiquid` | number | `1` | 0–1 | **液态玻璃总开关**：`1` = 开（通透玻璃 + 折射 + 色散）；`0` = 经典毛玻璃（不透明度 72%、均匀模糊 24px，此时下面几个观感参数不再生效） |
+| `glassAlpha` | number | `28` | 5–100 | 玻璃底色不透明度（%），越小越透；**低到 20 以下会因为太透而发灰** |
+| `glassBlur` | number | `2` | 0–48 | 面板背后内容的模糊半径（px）—— 「糊不糊」主要看它 |
+| `glassSaturate` | number | `110` | 100–260 | 透过面板看到的颜色饱和度（%）—— **想要玻璃的「色」调高它；调低只会让画面发白** |
+| `glassHighlight` | number | `60` | 0–100 | 边缘亮线与色散强度（%）；**调到 0 可以完全关掉彩边** |
+| `glassRadius` | number | `22` | 4–28 | 面板圆角（px） |
+| `glassRefraction` | number | `32` | 0–100 | 折射感强度（%）—— 驱动边缘两层环带的宽度与额外模糊量，「厚玻璃感」看它 |
 
-后五个只影响面板观感，改坏了随时可以逐个「恢复默认」。把 `glassBlur` 调成 0 就能直观
+这几个只影响面板观感，改坏了随时可以逐个「恢复默认」。把 `glassBlur` 调成 0 就能直观
 看到它的作用 —— 面板会退化成一块几乎透明的玻璃片，背后正文清晰穿透：
 [`docs/screenshots/param-blur-off.png`](https://github.com/Fo-Rimuru/dsh-deepseek-official-status/blob/main/docs/screenshots/param-blur-off.png)。
 
@@ -59,6 +83,37 @@ profile `package.json` 的 `dsh.profile.bundles` 数组里，`dsh plugin add` �
 
 也可以在 profile 的 `cordis.patch.yml` 里给这行加 `config:` 段作为首次运行的默认值
 （命名空间 `deepseek-official-status`，即 `cordis.patch.yml` 里的 row id）。
+
+## 常见问题
+
+**面板发白 / 发灰，怎么调？**
+往上调 `glassSaturate`（颜色更浓）和 `glassAlpha`（更有「体」）。**注意：降饱和、
+提亮都会让画面发白** —— 玻璃的「透」来自颜色更浓 + 边缘更亮，不是来自更白。
+
+**面板太糊（像磨砂塑料）？**
+往下调 `glassBlur`（整块背景模糊）和 `glassRefraction`（边缘那层额外模糊）。
+当前默认（`glassBlur 2`）已经接近「几乎不遮挡背景」。
+
+**改了参数没生效？**
+配置卡片是**草稿制**：改完必须点**「保存」**。保存后**打开一次面板**即刷新
+（不需要重启，也不需要等轮询周期）。
+
+**信号灯是灰色、显示「状态未知」？**
+说明三条数据路径都没抓到（状态页改版、网络不通、被拦……）。此时插件**保留上一次成功
+的快照**并标注「更新于 X 分钟前」，同时给出失败原因。**它不会把未知显示成「正常」** ——
+这是刻意设计。
+
+**显示「组件状态数据源不可用」？**
+已降级到 RSS 兜底路径：只有事件列表可用，组件状态与 uptime 拿不到，所以总体状态是灰色。
+此时事件标题会变成可点链接。详见下面的「数据来源」。
+
+**需要装壁纸插件才能用吗？**
+不需要，两者互不影响。检测到壁纸引擎时会跟随它的色系（但**不透明度仍由本插件的
+`glassAlpha` 控制**）。
+
+**会影响 DSH 性能吗？**
+不会。宿主每 60 秒发一次 HTTP 请求（可在配置里改），浏览器侧每 20 秒读一次**本地**
+路由，没有额外的渲染开销。
 
 ## 数据来源（为什么这么实现）
 
@@ -123,6 +178,32 @@ node test/rss-fallback.smoke.mjs
 `link:` 安装时该包只存在于 profile 的 `node_modules` 里，工作区目录向上找不到它。
 开发目录需要一个 `node_modules` 目录能解析到 `@deepseek-ai/*`（本机做法是指向
 profile `node_modules` 的 junction）。从 npm 安装的插件不受影响。
+
+## 反馈与贡献
+
+**发现问题、有建议、或者想加功能，都欢迎提 Issue：**
+
+👉 **https://github.com/Fo-Rimuru/dsh-deepseek-official-status/issues**
+
+为了能快速定位，报问题时**尽量附上这几项**：
+
+1. **DSH 版本**（设置页底部可见）与本插件的版本（插件卡片标题右侧）；
+2. **现象**：截图最好 —— 尤其是面板截图，颜色/布局问题一眼就能看出来；
+3. **路由返回值**：浏览器访问 `http://127.0.0.1:<你的端口>/deepseek-official-status/current`
+   会返回一段 JSON，其中的 `error` 字段就是抓取失败的原因（例如
+   `rsc: fetch failed; html: fetch failed; rss: fetch failed`）；
+4. **有没有装壁纸插件**（`dsh-plugin-wallpaper-engine`）—— 面板底色会跟随它的色系，
+   这会影响观感类问题的判断。
+
+**Pull Request** 同样欢迎。提交前请先跑一遍上面「开发」里的三类测试；改动了面板观感
+相关的默认值时，**记得同步更新本文件的参数表**（这张表就是 npm 页面上显示的内容）。
+
+## 相关链接
+
+- npm：[dsh-deepseek-official-status](https://www.npmjs.com/package/dsh-deepseek-official-status)
+- GitHub：[Fo-Rimuru/dsh-deepseek-official-status](https://github.com/Fo-Rimuru/dsh-deepseek-official-status)
+- 上游状态页：[status.deepseek.com](https://status.deepseek.com/)
+- 本插件的数据源说明见上面「数据来源」一节
 
 ## 许可
 
