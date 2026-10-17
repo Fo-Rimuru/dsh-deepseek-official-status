@@ -64,7 +64,7 @@ dsh plugin --profile desktop add 'D:\path\to\dsh-deepseek-official-status'
 | `pollIntervalMs` | number | `60000` | 15000–3600000 | 宿主轮询间隔（毫秒） |
 | `timeoutMs` | number | `15000` | 5000–120000 | 单次抓取超时（毫秒） |
 | `glassLiquid` | number | `1` | 0–1 | **液态玻璃总开关**：`1` = 开（通透玻璃 + 折射 + 色散）；`0` = 经典毛玻璃（不透明度 72%、均匀模糊 24px，此时下面几个观感参数不再生效） |
-| `glassAlpha` | number | `28` | 5–100 | 玻璃底色不透明度（%），越小越透；**低到 20 以下会因为太透而发灰** |
+| `glassAlpha` | number | `12` | 5–100 | 玻璃底色不透明度（%），越小越透；**低到 20 以下会因为太透而发灰** |
 | `glassBlur` | number | `2` | 0–48 | 面板背后内容的模糊半径（px）—— 「糊不糊」主要看它 |
 | `glassSaturate` | number | `110` | 100–260 | 透过面板看到的颜色饱和度（%）—— **想要玻璃的「色」调高它；调低只会让画面发白** |
 | `glassHighlight` | number | `60` | 0–100 | 边缘亮线与色散强度（%）；**调到 0 可以完全关掉彩边** |
