@@ -1,6 +1,6 @@
 {
   "name": "dsh-deepseek-official-status",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "在 DSH 会话头部用一颗信号灯实时显示 DeepSeek 官方服务状态（status.deepseek.com）：悬停展开总体状态、各组件与可用率、进行中与最近事件。 Live DeepSeek official service status as a traffic-light dot in the DSH conversation header.",
   "keywords": [
     "deepseek-harness",
