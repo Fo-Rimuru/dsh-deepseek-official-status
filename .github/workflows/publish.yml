@@ -70,7 +70,21 @@ jobs:
           npm install -g npm@latest
           echo "npm 版本: $(npm --version)"
 
+      # 版本已发布就跳过：tag 重推、或手动发布与 CI 并行时，
+      # 不至于因为「cannot publish over the previously published versions」把 CI 变红。
+      - name: 检查该版本是否已发布
+        id: check
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "dsh-deepseek-official-status@$VERSION" version >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::npm 上已存在 $VERSION，跳过发布"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: 发布到 npm
+        if: steps.check.outputs.published != 'true'
         # 故意不传 NODE_AUTH_TOKEN：GitHub 用工作流的身份令牌向 npm 换取**短期**凭据。
         run: |
           if [ "${{ inputs.dry_run }}" = "true" ]; then
@@ -81,7 +95,7 @@ jobs:
           fi
 
       - name: 建 GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v') && inputs.dry_run != true
+        if: startsWith(github.ref, 'refs/tags/v') && inputs.dry_run != true && steps.check.outputs.published != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes
